@@ -1,0 +1,48 @@
+
+
+02 - SQL을 이용한 데이터 정의
+
+테이블 생성
+    CREATE TABLE 테이블 이름(
+       1-> 속성_이름 데이터_타입 [NOT NULL] [DEAFAULT 기본_값]
+       2-> [PRIMARY KEY (속성_리스트)]
+       3-> [UNIQUE (속성_리스트)]
+       4-> [FOREIGN KEY (속성_리스트) REFERENCES 테이블_이름(속성_리스트)]
+           [ON DELETE 옵션] [ON UPDATE 옵션]
+       5-> [CONSTRAINT 이름] [CHECK(조건)]
+        );
+
+    1 : 테이블을 구성하는 각 속성의 이름과 데이터 타입, 기본적인 제약 사항을 정의한다
+    2 : 기본키로 테이블에 하나만 존재할 수 있다
+    3 : 대체키로 테이블에 여러 개 존재할 수 있다
+    4 : 왜래키로 테이블에 여러 개 존재할 수 있다
+    5 : 무결성을 위한 제약조건으로 테이블에 여러개 존재할 수 있다
+    []표시는 생략할 수 있다
+
+    - CREATE TABLE 문으로 생성되는 테이블을 구성하는 속성은 기본적으로 널 값이 허용된다
+    - 외래키 옵션을 정의 하지않으면 기본적으로 ON DELETE NO ACTION이 선택된다
+        - ON DELTE NO OPTION
+        - ON DELTE CASCADE
+        - ON DELETE SET NULL
+        - ON DELETE SET DEFAULT
+    - CHECK 키워드를 사용해 특정 속성에 대한 제약조건을 지정할 수 있다
+        - 테이블에 CHECK 키워드로 지정한 제약조건을 만족하는 튜플만 존재하게 된다
+        - CHECK (재고량 >=0 AND 재고량 <=1000)
+        - CHECK 키워드를 사용해 지정한 제약조건에 CONSTRAINT키워드와 함께 이름을 부여할 수 있다
+            - CONSTRAINT CHK_CPY CHECK(제조업체 ='한빛제과')
+
+테이블 변경
+    - 새로운 속성 추가, 기존 속성 삭제, 새로운 제약조건 추가, 기존 제약 조건 삭제등을 할 수 있다
+    - 새로운 속성 추가
+        - ALTER TABLE 테이블_이름
+            ADD 속성_이름 데이터_타입 [NOT NULL] [DEFAULT 기본_값];
+    - 기존 속성 삭제
+        - ALTER TABLE 테이블_이름 DROP COLUMN 속성이름;
+        - 삭제하려는 속성을 참조하고 있느 ㄴ다른 속성이 존재하는 경우에는 삭제할수 없다 (참조되는 속성을 먼제 삭제해야한다)
+    - 새로운 제약 조건 추가
+        - ALTER TABLE 테이블_이름 ADD CONSTRAINT 제약조건_이름 제약조건_내용;
+    - 기본 제약 조건 삭제
+        - ALTER TABLE 테이블_이름 DROP CONSTRAINT 제약조건_이름
+
+테이블 삭제
+    - DROP TABLE 테이블_이름
