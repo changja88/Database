@@ -92,6 +92,18 @@
     - WHERE 와 HAVING의 차이를 이해하는 것이 중요하다
         - WHERE는 그룹과 집계가 계산되기 전에 입력 행을 선택한다 -> 집계 계산에 포함되는 행을 제어한다
         - HAVING은 그룹 및 집계가 계산된 후에 그룹 행을 선택한다 -> 항상 집계 함수를 포함한다
+        - 따라서 WHERE 절이 집계 함수를 포함해서는 안된다
+
+- 업떼이트
+    UPDATE weather SET temp_hi = temp_hi 2, temp_lo = temp_lo 2
+    WHERE date > '1944-11-28'
+
+
+- 삭제
+    DELETE FROM wehater WHERE city = 'Hayward';
+
+    DELETE FROM tablename;
+    - 한정이 없는 경우 DELTE는 지정된 테이블의 모든 행을 삭제해 빈 것으로 만든다
 
 
 
