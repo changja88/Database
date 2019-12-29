@@ -1,0 +1,98 @@
+
+
+02 - SQL언어
+
+- 새 테이블 생성
+    - 모든 컬림 이름 및 타입과 함께 테이블 이름을 지정함으로써 새 테이블을 생성할 수 있다
+    - 스페이스, 탭, 공백은 SQL 명령에서 자유롭게 사용할 수 있따
+    - '--'는 주석을 의미한다 (그 줄 끝까지 무시된다)
+    - 대소문자를 유지하기 위해 실벽자에 큰따움표가 사용된 경우 외에 SQL은 키워드 및 식별자의 대소문자를 구분한다
+    - 표준 SQL이 지원하는 int, smallint, real, double, percision, char(N), varchar(n)
+      date, time, timestamp, interval 및 그 외 다양한 타입을 지원한다
+    - 여러 가지 사용자 정의 데이터 타입을 사용하기 위해 PostgreSQL을 커스터마이즈할 수도 있다
+
+    CREATE TABLE weather(
+        city    varchar(80),
+        temp_lo int,
+        temp_hi int,
+        prcp    real, --강수량
+        date    date
+    );
+
+
+- 테이블을 행으로 채우기
+    INSERT INTO weather VALUES ('San Francisco', 46,50,0.25,'1994-11-27')
+    - 단순한 숫자 값이 아닌 상수는 일반적으로 예제처럼 작은따옴표를 앞뒤에 사용한다
+
+    INSERT INTO cities VALUES  ('San Francisco', '(-194.0,53.0)')
+    - point 타입은 위에 예제처럼 두개의 좌표가 필요하
+
+    INSERT INTO weather(city, temp_lo, temp_hi, prcp, date)
+    VALUES ('San Francisco', 43, 57, 0.0, '1944-11-29');
+    - 대체 구문에서는 컬럼 목록을 명시적으로 나열할 수 있다
+    - 원하는 경우 컬럼 순서를 바꾸러나, 일부 컬럼은 생략할 수도 있다
+
+- 테이블에서 쿼리 사용
+    SELECT city, temp_lo, temp_hi, prcp, date FROM weather;
+    - 명령문은 선택 목록(리턴할 컬럼을 나열하는 부분),
+      테이블 목록(데이터가 검색되는 테이블을 나열하는 부분),
+      선택적 한정(제한을 지정하는 부분) 으로 나뉜다
+
+    - '*'은 '모든 컬럼'의 축약어다
+
+    SELECT city, (temp_hi+temp_lo)/2 AS temp_avg, date FROM weather;
+    - 간단한 컬럼 참조뿐 아니라 표현식을 select목록에 작성할 수 있다
+
+    SELECT * FROM weather WHERE city = 'San Francisco' AND prcp > 0.0;
+    - WHERE절을 추가함으로써 쿼리를 '제한'할 수 있다
+    - WHERE 절에는 Boolean표현식이 포함되고 true인 행만 리턴된다
+
+    SELECT * FROM weather ORDER BY city
+    - 쿼리의 결과가 정렬된 순서로 리턴되도록 요청할 수 있다
+
+    SELECT DISTINCT city FROM weather
+    - 쿼리 결과에서 중복 행은 삭제하도록 요청할 수 있다
+
+
+- 테이블간 조인
+    SELECT * FROM weather, cities WHERE city = name;
+    SELECT * FROM weather, cities WHERE weather.city = cities.name (위와 동일)
+    SELECT * FROM weather INNER JOIN cities ON (weather.city = cities.name); (위와 동일)
+    - 쿼리는 테이블의 여러행을 동시에 처리하는 방식으로 복수의 테이블에 한 번에 엑세스하거나 동일한 테이블에 엑세스할 수 있다
+    - cities 테이블에 존재하지 않는 도시는 weather에 있더라도 나오지 않게된다
+
+    SELECT * FROM weather LEFT OUTER JOIN cities ON (weather.city = cities.name);
+    - 위와 다른 결과
+    - weather 테이블을 스캔하고, 각 행에 대해 일치하는 cities행을 찾고, 일치하는 행이 없을 경우
+      비어있는 값을 cities테이블의 컬럼으로 대체 한
+
+    - 셀프 조인
+    SELECT W1.city, W1.temp_lo AS low, W1.temp_hi AS high,
+           W2.city, W2.temp_lo AS low, W2.temp_hi AS high
+    FROM weather W1, weather W2
+    WHERE W1.temp_lo < W2.temp_lo
+    AND W1.temp_hi > W2.temp_hi;
+
+
+- 집계 함수
+    - 집계 함수는 여러 개의 입력 행으로부터 단일 결과를 계산한다
+    - count, sum, avg, max, min 의 집계 함수가 있다
+
+    SELECT city FROM weather WHERE temp_lo = max(temp_lo);
+    - max는 WHERE절에서 사용할 수 없으므로 이것은 동작하지 않는다
+    - 집계 함수는 정해진 여러 개의 행을 대상으로 연산을 수행하는데 아직 행이 정해져 있지 않기때문에 불가능하다
+
+    SELECT city FROM weather WHERE temp_lo = (SELECT max(temp_lo) FROM wather);
+    - 위에 것을 하고 싶다면 서브 쿼리를 활용 하면 된다
+    - 서브 쿼리는 외부 쿼리에서 발생하는 것과는 별개로 자체 집ㅈ계가 계산되는 독립적인 졔산이기 때문에 가능하다
+
+    SELECT city, max(temp_lo) FROM weather GROUP BY city HAVING max(temp_10) < 40;
+    - GROUP BY + HAVING
+
+    - WHERE 와 HAVING의 차이를 이해하는 것이 중요하다
+        - WHERE는 그룹과 집계가 계산되기 전에 입력 행을 선택한다 -> 집계 계산에 포함되는 행을 제어한다
+        - HAVING은 그룹 및 집계가 계산된 후에 그룹 행을 선택한다 -> 항상 집계 함수를 포함한다
+
+
+
+
